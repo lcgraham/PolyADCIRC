@@ -17,9 +17,20 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import polyadcirc.pyGriddata.file_management as fm
 import polyadcirc.pyADCIRC.fort15_management as f15
 import polyadcirc.pyGriddata.table_to_mesh_map as tmm
+import matplotlib.ticker as ticker
+
+
 
 _stationmarkers = {'fort61':'bo', 'fort62':'go', 'fort71':'ro', 'fort72':'co',
                    'fort81':'yo', 'fort91':'ko'}
+
+def hhmmss(time_val, pos):
+    time_val = int(np.round(time_val))
+    hours = time_val/(60*60)
+    minutes = (time_val - (hours*60*60))/60
+    seconds = time_val - (hours*60*60) - (minutes*60)
+    hhmmss_string = "{:02d}:{:02d}:{:02d}".format(hours,minutes,seconds)
+    return hhmmss_string#, hours, minutes, seconds&
 
 def get_Triangulation(domain, path=None, save=True, show=False, ics=1,
                       ext='.png', title=False):
@@ -146,7 +157,7 @@ def station_locations(domain, path=None, bathy = False, save=True,
     save_show(os.path.join(path, 'figs', 'station_locations'), save, show, ext)
 
 def field(domain, z, title, clim = None,  path=None, save=True, show =
-          False, ics=1, ext='.png', cmap=plt.cm.jet):
+          False, ics=1, ext='.png', cmap=plt.cm.jet, fmt=None):
     """
     Given a domain, plot the nodal value z
    
@@ -163,6 +174,8 @@ def field(domain, z, title, clim = None,  path=None, save=True, show =
     :param int ics:  polar coordinate option (1 = cart coords, 2 = polar
         coords)
     :param string ext: file extension
+    :param callable fmt: formatter for color bar, takes ``(x, pos)`` returns
+        ``string`` 
 
     """
     if path is None:
@@ -175,7 +188,7 @@ def field(domain, z, title, clim = None,  path=None, save=True, show =
     if clim:
         plt.clim(clim[0], clim[1])
     add_2d_axes_labels(ics=ics)    
-    colorbar()
+    colorbar(fmt=fmt)
     #plt.title(title)
     save_show(os.path.join(path, 'figs', title), save, show, ext)
 
@@ -751,17 +764,19 @@ def save_show(full_name, save, show, ext):
     else:
         plt.close()
 
-def colorbar(mappable = None):
+def colorbar(mappable = None, fmt = None):
     """
     Add a colorbar to the current figure/plot/subfigure/axes
 
     :param mappable: See `matplotlib <matplotlib.org>`_
-    
+    :param callable fmt: formatter for color bar, takes ``(x, pos)`` returns
+        ``string`` 
+
     """
     ax = plt.gca()
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", "5%", pad="3%")
-    return plt.colorbar(mappable, cax=cax)
+    return plt.colorbar(mappable, cax=cax, format=ticker.FuncFormatter(fmt))
 
 def load_fig_gen_cmap():
     """
