@@ -758,7 +758,7 @@ def save_show(full_name, save, show, ext):
     plt.tight_layout()
     if save:
         plt.savefig(full_name+ext, bbox_inches='tight', transparent=True,
-                    pad_inches=0.1)
+                    pad_inches=0.3)
     if show:
         plt.show()
     else:
@@ -776,7 +776,10 @@ def colorbar(mappable = None, fmt = None):
     ax = plt.gca()
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", "5%", pad="3%")
-    return plt.colorbar(mappable, cax=cax, format=ticker.FuncFormatter(fmt))
+    if fmt:
+        return plt.colorbar(mappable, cax=cax, format=ticker.FuncFormatter(fmt))
+    else:
+        return plt.colorbar(mappable, cax=cax)
 
 def load_fig_gen_cmap():
     """
